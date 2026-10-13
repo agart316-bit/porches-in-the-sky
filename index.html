@@ -288,7 +288,7 @@ const CEN={};{let acc=0;FLOORS.forEach((f,i)=>{CEN[f.n]=(acc+INV[i]/2)/TS*100;ac
 // Below this width the mobile layout fills the screen; above it, the desktop layout.
 const MQ='(max-width: 600px)';
 // Shopfront for the book.
-const SHOP_URL='Porches in the Sky - Shop.html';
+const SHOP_URL='shop.html';
 class Component extends DCLogic{
   state={floor:1,ride:false,dir:'',text:'',showText:false,zoom:false,hover:null,turn:0,mobile:window.matchMedia(MQ).matches};
   componentDidMount(){requestAnimationFrame(()=>{const el=this.el;if(el){el.scrollTop=el.scrollHeight;this.goTo(1,false);this.settle();}});
