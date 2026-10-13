@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Porches in the Sky — Shop</title>
+<style>
+  /* Same ground as the building page with "paper" on: #0c0c0c / #fff inverted. */
+  :root{--ground:#f3f3f3;--ink:#000;--muted:rgba(0,0,0,.6);--faint:rgba(0,0,0,.45);--rule:rgba(0,0,0,.18);--slot:#d5d5d5;--side:40px}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  *,*::before,*::after{font-family:Helvetica,Arial,sans-serif!important}
+  html,body{margin:0;background:var(--ground);font-family:Helvetica,Arial,sans-serif;color:var(--ink)}
+  a{color:var(--ink)}a:hover{color:#444}
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  .noscroll::-webkit-scrollbar{display:none}
+
+  /* Metal — matches the book cover: foil plates, chrome screw heads, star studs */
+  :root{--foil:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 35%,rgba(255,255,255,.5) 52%,rgba(90,96,104,.2) 70%,rgba(255,255,255,.35) 100%),url(assets/foil.png) center/cover;--foil-dark:linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 35%,rgba(255,255,255,.22) 52%,rgba(0,0,0,.2) 70%,rgba(255,255,255,.12) 100%),url(assets/foil-dark.png) center/cover;--chrome:radial-gradient(circle at 34% 28%,#fff 0%,#e6e9ec 22%,#a9afb6 62%,#6b7178 100%);--screw:radial-gradient(circle at 35% 30%,#fff 0%,#dfe3e7 30%,#8d939a 72%,#5a6067 100%);--star:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);--star-fill:linear-gradient(135deg,#fff 0%,#b4bac1 40%,#f6f7f9 55%,#6c727a 100%)}
+  .stud{position:fixed;z-index:50;width:16px;height:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));pointer-events:none}
+  .stud::before{content:'';display:block;width:100%;height:100%;clip-path:var(--star);background:var(--star-fill)}
+  .stud.tl{top:22px;left:22px}.stud.tr{top:22px;right:22px}.stud.bl{bottom:22px;left:22px}.stud.br{bottom:22px;right:22px}
+  .screw{position:absolute;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--screw);box-shadow:0 1px 2px rgba(0,0,0,.45);pointer-events:none}
+  .screw::before,.screw::after{content:'';position:absolute;background:#4b5056}
+  .screw::before{left:3px;top:5px;width:6px;height:2px}.screw::after{left:5px;top:3px;width:2px;height:6px}
+  @media (max-width:600px){.stud{display:none}}
+
+  /* Top bar — matches the building page header */
+  .bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(28px + env(safe-area-inset-top,0px)) var(--side) 20px;font-size:13px;background:var(--ground)}
+  .bar a{text-decoration:none}
+  .bar{padding-left:52px;padding-right:52px;align-items:center;padding-top:calc(22px + env(safe-area-inset-top,0px))}
+  .bar .bag-btn{position:relative;border:0;height:30px;padding:0 14px 0 28px;font-size:12px;color:#1b1d20;text-shadow:0 1px 0 rgba(255,255,255,.75);background:var(--foil);box-shadow:0 0 0 1px #8a9097,inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.25),0 2px 4px rgba(0,0,0,.2)}
+  .bar .bag-btn:hover{filter:brightness(1.06)}
+  .bar .bag-btn .screw{left:9px;width:10px;height:10px;margin-top:-5px}
+  .bar .bag-btn .screw::before{left:2px;top:4px}.bar .bag-btn .screw::after{left:4px;top:2px}
+
+  /* Product */
+  .page{display:grid;grid-template-columns:min(calc(100vh - 150px),calc(100vw - 2 * var(--side) - 64px - min(360px,30vw))) min(360px,30vw);justify-content:center;gap:64px;padding:96px var(--side) 80px;max-width:1440px;margin:0 auto}
+  .gallery{display:flex;flex-direction:column;gap:12px;width:100%}
+  .viewer{position:relative;width:100%;aspect-ratio:402 / 330;background:var(--slot);cursor:zoom-in}
+  .nav{background:none;border:0;padding:0;width:36px;height:52px;font-size:22px;line-height:1;color:var(--ink);cursor:pointer}
+  .nav:hover{color:#777}
+  .viewer img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
+  .viewer .nav{position:absolute;top:50%;margin-top:-26px;z-index:1}
+  .viewer .prev{left:-48px}.viewer .next{right:-48px}
+  .count{position:absolute;right:16px;bottom:14px;font-size:12px;font-variant-numeric:tabular-nums;background:rgba(243,243,243,.9);padding:4px 8px;pointer-events:none}
+  .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .thumb{aspect-ratio:402 / 330;padding:0;border:0;background:var(--slot);cursor:pointer;opacity:.5;transition:opacity .2s}
+  .thumb:hover{opacity:.85}
+  .thumb.on{opacity:1;box-shadow:0 0 0 1.5px var(--ink)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .lightbox{position:fixed;inset:0;z-index:60;background:var(--ground);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .lightbox.on{opacity:1;pointer-events:auto}
+  .lightbox img{max-width:calc(100% - 200px);max-height:calc(100% - 140px);object-fit:contain;display:block;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+  .lightbox .nav{position:absolute;top:50%;margin-top:-26px}
+  .lightbox .prev{left:40px}.lightbox .next{right:40px}
+  .lightbox .close{position:absolute;top:28px;right:40px;font-size:13px;background:none;border:0;cursor:pointer;color:var(--ink)}
+  .lightbox .count{right:auto;left:50%;transform:translateX(-50%);bottom:32px;background:none}
+  .info{position:sticky;top:96px;align-self:start;display:flex;flex-direction:column;gap:28px}
+  .floor-no{display:flex;align-items:flex-end;gap:8px}
+  .floor-no .n{font-size:104px;line-height:.78;letter-spacing:-0.06em;font-variant-numeric:tabular-nums}
+  .floor-no .of{font-size:13px;padding-bottom:4px}
+  h1{margin:0;font-weight:400;font-size:28px;line-height:1.05;letter-spacing:-0.02em}
+  .price{font-size:15px;font-variant-numeric:tabular-nums}
+  .blurb{font-size:15px;line-height:1.45;text-wrap:pretty;margin:0}
+  .specs{display:flex;flex-direction:column;gap:14px;font-size:13px;line-height:1.5}
+  .specs .k{font-size:11px;color:var(--faint)}
+  .buy{display:flex;flex-direction:column;gap:14px}
+  .qty{display:flex;align-items:center;gap:12px}
+  .round{width:52px;height:52px;border-radius:50%;border:0;padding:0;font-size:18px;color:#3d4248;text-shadow:0 1px 0 rgba(255,255,255,.85);background:var(--chrome);box-shadow:0 0 0 1px #7d838a,0 3px 6px rgba(0,0,0,.35),inset 0 -2px 3px rgba(0,0,0,.25),inset 0 2px 2px rgba(255,255,255,.9)}
+  .round:hover{filter:brightness(1.08)}
+  .round:active{box-shadow:0 0 0 1px #7d838a,0 1px 2px rgba(0,0,0,.35),inset 0 2px 4px rgba(0,0,0,.35);transform:translateY(1px)}
+  .round:disabled{opacity:.3;pointer-events:none}
+  .qty .round{width:34px;height:34px;font-size:14px}
+  .qty .v{min-width:28px;text-align:center;font-size:15px;font-variant-numeric:tabular-nums}
+  .btn{position:relative;height:52px;padding:0 34px;border:0;font-size:13px;width:100%;color:#f3f4f6;text-shadow:0 -1px 0 rgba(0,0,0,.6);background:var(--foil-dark);box-shadow:0 0 0 1px #2c3035,inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.5),0 2px 5px rgba(0,0,0,.3)}
+  .btn::before,.btn::after{content:'';position:absolute;top:50%;width:12px;height:12px;margin-top:-6px;clip-path:var(--star);background:var(--star-fill)}
+  .btn::before{left:12px}.btn::after{right:12px}
+  .btn:hover{filter:brightness(1.15);color:#f3f4f6}
+  .btn:active{box-shadow:0 0 0 1px #2c3035,inset 0 2px 4px rgba(0,0,0,.5);transform:translateY(1px)}
+  .btn.ghost{color:#1b1d20;text-shadow:0 1px 0 rgba(255,255,255,.75);background:var(--foil);box-shadow:0 0 0 1px #8a9097,inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.25),0 2px 5px rgba(0,0,0,.25)}
+  .btn.ghost::before,.btn.ghost::after{clip-path:circle(50%);background:var(--screw);box-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .btn.ghost:hover{filter:brightness(1.06);color:#1b1d20}
+  .btn.ghost:active{box-shadow:0 0 0 1px #8a9097,inset 0 2px 4px rgba(0,0,0,.3)}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .note{font-size:11px;color:var(--faint)}
+  .added{font-size:13px;color:var(--muted);min-height:1.2em;transition:opacity .4s}
+
+  /* Bag drawer */
+  .scrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .4s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;z-index:31;width:min(420px,100%);background:var(--ground);border-left:4px solid #a9afb6;box-shadow:inset 1px 0 0 #fff,-1px 0 0 #6b7178,-6px 0 18px rgba(0,0,0,.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .5s cubic-bezier(.3,0,.2,1)}
+  .drawer.on{transform:none}
+  .drawer-head{display:flex;justify-content:space-between;align-items:flex-start;padding:calc(28px + env(safe-area-inset-top,0px)) 28px 20px;font-size:13px}
+  .link-btn{position:relative;border:0;height:30px;padding:0 14px;font-size:12px;color:#1b1d20;text-shadow:0 1px 0 rgba(255,255,255,.75);background:var(--foil);box-shadow:0 0 0 1px #8a9097,inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.25),0 2px 4px rgba(0,0,0,.2)}
+  .link-btn:hover{filter:brightness(1.06)}
+  .lines{flex:1;overflow-y:auto;padding:0 28px;display:flex;flex-direction:column;gap:20px}
+  .line{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:start}
+  .line .cov{aspect-ratio:402 / 330;background:var(--foil);box-shadow:0 0 0 1px #8a9097;color:#3d4248!important;display:flex;align-items:flex-end;padding:6px;font-size:10px;color:var(--faint)}
+  .line .t{font-size:15px;margin-bottom:4px}
+  .line .s{font-size:11px;color:var(--faint);margin-bottom:12px}
+  .line .row{display:flex;align-items:center;justify-content:space-between}
+  .mini{display:flex;align-items:center;gap:8px}
+  .mini button{width:32px;height:32px;border-radius:50%;border:0;padding:0;font-size:14px;color:#3d4248;text-shadow:0 1px 0 rgba(255,255,255,.85);background:var(--chrome);box-shadow:0 0 0 1px #7d838a,0 2px 4px rgba(0,0,0,.3),inset 0 -1px 2px rgba(0,0,0,.25),inset 0 1px 1px rgba(255,255,255,.9)}
+  .mini button:hover{filter:brightness(1.08)}
+  .mini button:disabled{opacity:.35}
+  .mini span{min-width:18px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+  .empty{font-size:13px;color:var(--muted);padding-top:12px}
+  .drawer-foot{padding:20px 28px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:14px}
+  .sum{display:flex;justify-content:space-between;font-size:13px;font-variant-numeric:tabular-nums}
+  .sum.big{font-size:15px}
+
+  /* Checkout */
+  .checkout{position:fixed;inset:0;z-index:40;background:var(--ground);overflow-y:auto;opacity:0;transform:scale(1.06);pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.3,0,.2,1)}
+  .checkout.on{opacity:1;transform:none;pointer-events:auto}
+  .co-bar{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(28px + env(safe-area-inset-top,0px)) var(--side) 20px;font-size:13px;background:var(--ground)}
+  .steps{display:flex;gap:18px;color:var(--faint)}
+  .steps .on{color:var(--ink)}
+  .co-bar{padding-left:52px;padding-right:52px;align-items:center}
+  .co{display:grid;grid-template-columns:minmax(0,560px) min(340px,30vw);justify-content:center;gap:80px;padding:40px var(--side) 80px}
+  .co h2{margin:0 0 24px;font-weight:400;font-size:28px;letter-spacing:-0.02em;line-height:1.05}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1 / -1}
+  .field label{font-size:11px;color:var(--faint)}
+  .field input,.field select{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-bottom:1px solid rgba(0,0,0,.45);border-radius:0;padding:8px 0;outline:none;-webkit-appearance:none;appearance:none}
+  .field input:focus,.field select:focus{border-bottom-color:var(--ink)}
+  .field.bad input,.field.bad select{border-bottom-color:#b00}
+  .field .err{font-size:11px;color:#b00;min-height:1em}
+  .group-label{font-size:11px;color:var(--faint);margin:36px 0 12px}
+  .options{display:flex;flex-direction:column;gap:10px}
+  .opt{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px 14px 38px;border:1px solid rgba(0,0,0,.3);font-size:13px;cursor:pointer;transition:background .2s}
+  .opt::before{content:'';position:absolute;left:14px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;box-shadow:inset 0 1px 2px rgba(0,0,0,.35);background:#e2e4e6}
+  .opt:hover{border-color:#6b7178}
+  .opt.sel{border-color:transparent;background:var(--foil);box-shadow:0 0 0 1px #8a9097,inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.25),0 2px 5px rgba(0,0,0,.2);text-shadow:0 1px 0 rgba(255,255,255,.7)}
+  .opt.sel::before{background:var(--screw);box-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .opt.sel .d{color:rgba(0,0,0,.6)}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt .d{font-size:11px;color:var(--faint);margin-top:3px}
+  .co-actions{display:flex;gap:12px;margin-top:40px}
+  .co-actions .btn{width:auto;min-width:160px}
+  .review{display:flex;flex-direction:column;gap:22px;font-size:13px;line-height:1.5}
+  .review .k{font-size:11px;color:var(--faint)}
+  .summary{position:sticky;top:96px;align-self:start;display:flex;flex-direction:column;gap:14px;padding-top:4px}
+  .summary .k{font-size:11px;color:var(--faint);margin-bottom:6px}
+  .summary .line{grid-template-columns:72px 1fr}
+  .summary hr{border:0;border-top:1px solid var(--rule);margin:6px 0;width:100%}
+  .done{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:120px var(--side) 80px;max-width:640px;margin:0 auto}
+  .done .floor-no .n{font-size:min(30vw,240px)}
+
+  /* Mobile — same proportions as the building page's mobile layout */
+  .sticky-buy{display:none}
+  @media (max-width:600px){
+    :root{--side:24px}
+    .bar{height:calc(64px + env(safe-area-inset-top,0px));align-items:flex-end;padding:0 26px 14px;font-size:11px;color:var(--muted)}
+    .bar .bag-btn{font-size:11px}
+    .page{grid-template-columns:1fr;gap:32px;padding:80px 0 140px}
+    .gallery{padding:0 24px;gap:10px;width:auto}
+    .thumbs{gap:8px}
+    .viewer .nav,.lightbox .nav{width:24px;height:44px;margin-top:-22px;font-size:18px}
+    .viewer .prev{left:-24px}.viewer .next{right:-24px}
+    .lightbox img{max-width:100%;max-height:calc(100% - 200px)}
+    .lightbox .prev{left:24px;top:auto;bottom:24px;margin:0}.lightbox .next{right:24px;top:auto;bottom:24px;margin:0}
+    .lightbox .close{top:24px;right:24px}.lightbox .count{bottom:36px}
+    .info{position:static;padding:0 24px;gap:24px}
+    .floor-no .n{font-size:104px}
+    .floor-no .of{font-size:12px}
+    .blurb{font-size:14px;line-height:1.4}
+    .buy{display:none}
+    .sticky-buy{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:10;gap:12px;align-items:center;padding:16px 24px calc(20px + env(safe-area-inset-bottom,0px));background:var(--ground);border-top:1px solid var(--rule)}
+    .sticky-buy .round{width:36px;height:36px;font-size:14px;flex:none}
+    .sticky-buy .v{min-width:18px;text-align:center;font-size:15px;font-variant-numeric:tabular-nums}
+    .sticky-buy .btn{height:48px;font-size:12px}
+    .qty .round{width:36px;height:36px;font-size:14px}
+    .drawer{border-left:0}
+    .drawer-head{padding:calc(14px + env(safe-area-inset-top,0px)) 26px 14px;height:calc(64px + env(safe-area-inset-top,0px));align-items:flex-end;font-size:11px}
+    .drawer-head .link-btn{font-size:11px}
+    .lines,.drawer-foot{padding-left:24px;padding-right:24px}
+    .btn{height:48px;font-size:12px}
+    .co-bar{height:calc(64px + env(safe-area-inset-top,0px));align-items:flex-end;padding:0 26px 14px;font-size:11px}
+    .co-bar .link-btn{font-size:11px}
+    .co{grid-template-columns:1fr;gap:40px;padding:24px 24px 60px}
+    .summary{position:static;order:-1;padding:16px;border:1px solid var(--rule)}
+    .bar,.co-bar{padding-left:26px;padding-right:20px;padding-bottom:10px}
+    .bar .bag-btn,.link-btn{height:28px}
+    .fields{grid-template-columns:1fr}
+    .co-actions{flex-direction:column-reverse}
+    .co-actions .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<span class="stud tl"></span><span class="stud tr"></span><span class="stud bl"></span><span class="stud br"></span>
+<header class="bar">
+  <a href="Porches in the Sky.dc.html">porches in the sky</a>
+  <button class="bag-btn" type="button" id="bagWrap"><span class="screw"></span><span id="bagBtn">bag (0)</span></button>
+</header>
+
+<main class="page">
+  <section class="gallery" aria-label="Book images">
+    <div class="viewer" id="viewer">
+      <img id="mainImg" src="assets/spreads/cover.jpg?v=2" alt="Cover">
+      <button class="nav prev" type="button" data-step="-1" aria-label="Previous image">←</button>
+      <button class="nav next" type="button" data-step="1" aria-label="Next image">→</button>
+      <div class="count" id="count">1 / 5</div>
+    </div>
+    <div class="thumbs">
+      <button class="thumb on" type="button" data-i="0" aria-label="Show cover"><img src="assets/spreads/cover.jpg?v=2" alt=""></button>
+      <button class="thumb" type="button" data-i="1" aria-label="Show spread 1"><img src="assets/spreads/spread-1.jpg?v=2" alt=""></button>
+      <button class="thumb" type="button" data-i="2" aria-label="Show spread 2"><img src="assets/spreads/spread-2.jpg?v=2" alt=""></button>
+      <button class="thumb" type="button" data-i="3" aria-label="Show spread 3"><img src="assets/spreads/spread-3.jpg?v=2" alt=""></button>
+      <button class="thumb" type="button" data-i="4" aria-label="Show spread 4"><img src="assets/spreads/spread-4.jpg?v=2" alt=""></button>
+    </div>
+  </section>
+
+  <section class="info">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h1>porches in the sky</h1>
+      <div class="price" id="price"></div>
+    </div>
+    <p class="blurb">A building fifty floors high, made only of fire escapes. Each floor is one photograph of a porch in the sky, and the stairs switch back from page to page, so the book climbs as you turn it.</p>
+    <div class="specs">
+      <div><div class="k">Pages</div><div>54</div></div>
+      <div><div class="k">Size</div><div>142 × 116 mm, landscape</div></div>
+      <div><div class="k">Printing</div><div>Black and white</div></div>
+    </div>
+    <div class="buy">
+      <div class="qty">
+        <button class="round" type="button" data-q="-1" aria-label="One fewer">−</button>
+        <span class="v" data-qv>1</span>
+        <button class="round" type="button" data-q="1" aria-label="One more">+</button>
+      </div>
+      <button class="btn" type="button" data-add>Add to bag</button>
+      <div class="added" data-added></div>
+    </div>
+    <a href="Porches in the Sky.dc.html" style="font-size:13px;color:var(--muted)">← Back to the building</a>
+  </section>
+</main>
+
+<div class="sticky-buy">
+  <button class="round" type="button" data-q="-1" aria-label="One fewer">−</button>
+  <span class="v" data-qv>1</span>
+  <button class="round" type="button" data-q="1" aria-label="One more">+</button>
+  <button class="btn" type="button" data-add>Add to bag</button>
+</div>
+
+<!-- Bag -->
+<div class="scrim" id="scrim"></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Book images" aria-hidden="true">
+  <img id="lbImg" src="assets/spreads/cover.jpg?v=2" alt="">
+  <button class="close" type="button" id="lbClose">close ✕</button>
+  <button class="nav prev" type="button" data-step="-1" aria-label="Previous image">←</button>
+  <button class="nav next" type="button" data-step="1" aria-label="Next image">→</button>
+  <div class="count" id="lbCount">1 / 5</div>
+</div>
+<aside class="drawer" id="drawer" aria-label="Bag" aria-hidden="true">
+  <div class="drawer-head"><span>your bag</span><button class="link-btn" type="button" id="closeBag">Close</button></div>
+  <div class="lines noscroll" id="lines"></div>
+  <div class="drawer-foot">
+    <div class="sum"><span>Subtotal</span><span id="subtotal"></span></div>
+    <div class="note">Delivery is chosen at checkout.</div>
+    <button class="btn" type="button" id="toCheckout">Checkout</button>
+  </div>
+</aside>
+
+<!-- Checkout -->
+<div class="checkout" id="checkout" aria-hidden="true">
+  <div class="co-bar">
+    <div class="steps"><span data-step="1">1 Details</span><span data-step="2">2 Review</span></div>
+    <button class="link-btn" type="button" id="closeCheckout">Back to shop</button>
+  </div>
+
+  <div class="co" id="coDetails">
+    <form id="form" novalidate>
+      <h2>Where is it going?</h2>
+      <div class="fields">
+        <div class="field full"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required><span class="err"></span></div>
+        <div class="field full"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required><span class="err"></span></div>
+        <div class="field full"><label for="addr1">Address</label><input id="addr1" name="addr1" autocomplete="address-line1" required><span class="err"></span></div>
+        <div class="field full"><label for="addr2">Apartment, floor (optional)</label><input id="addr2" name="addr2" autocomplete="address-line2"><span class="err"></span></div>
+        <div class="field"><label for="city">City</label><input id="city" name="city" autocomplete="address-level2" required><span class="err"></span></div>
+        <div class="field"><label for="postcode">Postcode</label><input id="postcode" name="postcode" autocomplete="postal-code" required><span class="err"></span></div>
+        <div class="field full"><label for="country">Country</label><input id="country" name="country" autocomplete="country-name" required><span class="err"></span></div>
+      </div>
+      <div class="group-label">Delivery</div>
+      <div class="options" id="shipOpts"></div>
+      <div class="co-actions">
+        <button class="btn ghost" type="button" data-back>Back to bag</button>
+        <button class="btn" type="submit">Review order</button>
+      </div>
+    </form>
+    <aside class="summary" data-summary></aside>
+  </div>
+
+  <div class="co" id="coReview" hidden>
+    <div>
+      <h2>Check it over</h2>
+      <div class="review" id="reviewBody"></div>
+      <div class="co-actions">
+        <button class="btn ghost" type="button" id="editDetails">Edit details</button>
+        <button class="btn" type="button" id="pay"></button>
+      </div>
+      <div class="note" id="payNote" style="margin-top:14px"></div>
+    </div>
+    <aside class="summary" data-summary></aside>
+  </div>
+
+  <div class="done" id="coDone" hidden>
+    <div class="floor-no"><span class="n">51</span><span class="of">/ 50</span></div>
+    <h2 style="margin:0;font-weight:400;font-size:28px;letter-spacing:-0.02em;line-height:1.05">You've reached the roof.</h2>
+    <p class="blurb" id="doneMsg"></p>
+    <div class="note" id="doneNote"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn" href="Porches in the Sky.dc.html" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;width:auto">Back to the building</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Shop settings — edit these ─────────────────────────────────────────────
+const SHOP = {
+  currency: '$',
+  price: 25,                 // per copy
+  maxQty: 10,
+  shipping: [
+    { id: 'standard', label: 'Standard post', detail: '3–5 working days', cost: 4 },
+    { id: 'tracked',  label: 'Tracked post',  detail: '1–2 working days', cost: 7 },
+    { id: 'collect',  label: 'Collect in person', detail: 'We’ll email you a time and place', cost: 0 },
+  ],
+  // Paste a hosted checkout link here (e.g. a Stripe Payment Link or Shopify / Big Cartel
+  // product URL) to take real payments. While it's empty, "Pay" finishes a demo order.
+  paymentUrl: '',
+};
+// ───────────────────────────────────────────────────────────────────────────
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const money = n => SHOP.currency + n.toFixed(2).replace(/\.00$/, '');
+const store = {
+  get(){ try { return JSON.parse(localStorage.getItem('pits-bag')) || 0; } catch { return 0; } },
+  set(n){ try { localStorage.setItem('pits-bag', JSON.stringify(n)); } catch {} },
+};
+
+let pick = 1, bag = Math.min(SHOP.maxQty, Math.max(0, +store.get() || 0)), ship = SHOP.shipping[0].id, details = null;
+
+function render(){
+  $('#price').textContent = money(SHOP.price);
+  $$('[data-qv]').forEach(e => e.textContent = pick);
+  $$('[data-q="-1"]').forEach(b => b.disabled = pick <= 1);
+  $$('[data-q="1"]').forEach(b => b.disabled = pick >= SHOP.maxQty);
+  $$('.sticky-buy [data-add]').forEach(b => b.textContent = 'Add to bag — ' + money(SHOP.price * pick));
+  $('#bagBtn').textContent = 'bag (' + bag + ')';
+  $('#subtotal').textContent = money(SHOP.price * bag);
+  $('#toCheckout').disabled = bag === 0;
+  $('#lines').innerHTML = bag ? lineHTML(true) : '<div class="empty">Nothing in your bag yet.</div>';
+  const shipCost = SHOP.shipping.find(s => s.id === ship).cost;
+  $$('[data-summary]').forEach(el => el.innerHTML =
+    '<div class="k">Order</div>' + lineHTML(false) + '<hr>' +
+    '<div class="sum"><span>Subtotal</span><span>' + money(SHOP.price * bag) + '</span></div>' +
+    '<div class="sum"><span>Delivery</span><span>' + (shipCost ? money(shipCost) : 'Free') + '</span></div>' +
+    '<hr><div class="sum big"><span>Total</span><span>' + money(total()) + '</span></div>');
+  $('#pay').textContent = 'Pay ' + money(total());
+}
+function total(){ return SHOP.price * bag + SHOP.shipping.find(s => s.id === ship).cost; }
+function lineHTML(editable){
+  return '<div class="line"><div class="cov">cover</div><div>' +
+    '<div class="t">porches in the sky</div><div class="s">54 pages · 142 × 116 mm</div>' +
+    '<div class="row">' + (editable
+      ? '<div class="mini"><button type="button" data-b="-1" aria-label="One fewer">−</button><span>' + bag + '</span><button type="button" data-b="1" aria-label="One more"' + (bag >= SHOP.maxQty ? ' disabled' : '') + '>+</button></div>'
+      : '<span class="note">Qty ' + bag + '</span>') +
+    '<span class="price">' + money(SHOP.price * bag) + '</span></div></div></div>';
+}
+function setBag(n){ bag = Math.max(0, Math.min(SHOP.maxQty, n)); store.set(bag); render(); }
+
+// Picking a quantity and adding
+$$('[data-q]').forEach(b => b.addEventListener('click', () => { pick = Math.max(1, Math.min(SHOP.maxQty, pick + +b.dataset.q)); render(); }));
+$$('[data-add]').forEach(b => b.addEventListener('click', () => {
+  const room = SHOP.maxQty - bag, n = Math.min(pick, room);
+  if (n > 0) setBag(bag + n);
+  const msg = $('[data-added]');
+  msg.textContent = n > 0 ? (n === 1 ? 'Added one copy.' : 'Added ' + n + ' copies.') : 'Your bag is full (' + SHOP.maxQty + ' max).';
+  pick = 1; render(); openBag();
+}));
+$('#lines').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (b) setBag(bag + +b.dataset.b); });
+
+// Bag drawer
+function openBag(){ $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); $('#drawer').setAttribute('aria-hidden','false'); }
+function closeBag(){ $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); $('#drawer').setAttribute('aria-hidden','true'); }
+$('#bagWrap').addEventListener('click', openBag);
+$('#closeBag').addEventListener('click', closeBag);
+$('#scrim').addEventListener('click', closeBag);
+
+// Checkout
+function step(n){
+  $('#coDetails').hidden = n !== 1; $('#coReview').hidden = n !== 2; $('#coDone').hidden = n !== 3;
+  $$('[data-step]').forEach(s => s.classList.toggle('on', +s.dataset.step === n));
+  $('.steps').style.visibility = n === 3 ? 'hidden' : '';
+  $('#checkout').scrollTop = 0;
+}
+function openCheckout(){ if (!bag) return; closeBag(); step(1); $('#checkout').classList.add('on'); $('#checkout').setAttribute('aria-hidden','false'); }
+function closeCheckout(){ $('#checkout').classList.remove('on'); $('#checkout').setAttribute('aria-hidden','true'); }
+$('#toCheckout').addEventListener('click', openCheckout);
+$('#closeCheckout').addEventListener('click', closeCheckout);
+$('[data-back]').addEventListener('click', () => { closeCheckout(); openBag(); });
+$('#editDetails').addEventListener('click', () => step(1));
+
+$('#shipOpts').innerHTML = SHOP.shipping.map(s =>
+  '<label class="opt' + (s.id === ship ? ' sel' : '') + '"><input type="radio" name="ship" value="' + s.id + '"' + (s.id === ship ? ' checked' : '') + '>' +
+  '<span><div>' + s.label + '</div><div class="d">' + s.detail + '</div></span><span>' + (s.cost ? money(s.cost) : 'Free') + '</span></label>').join('');
+$('#shipOpts').addEventListener('change', e => {
+  ship = e.target.value;
+  $$('.opt').forEach(o => o.classList.toggle('sel', o.querySelector('input').checked));
+  render();
+});
+
+const MSG = { valueMissing: 'Required', typeMismatch: 'Check this email address' };
+$('#form').addEventListener('submit', e => {
+  e.preventDefault();
+  let first = null;
+  $$('#form .field').forEach(f => {
+    const i = f.querySelector('input,select'), v = i.validity;
+    const err = v.valid ? '' : (v.valueMissing ? MSG.valueMissing : MSG.typeMismatch);
+    f.classList.toggle('bad', !!err); f.querySelector('.err').textContent = err;
+    if (err && !first) first = i;
+  });
+  if (first) { first.focus(); return; }
+  details = Object.fromEntries(new FormData(e.target));
+  const s = SHOP.shipping.find(x => x.id === ship);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+  $('#reviewBody').innerHTML =
+    '<div><div class="k">Contact</div><div>' + esc(details.email) + '</div></div>' +
+    '<div><div class="k">' + (ship === 'collect' ? 'Name' : 'Delivering to') + '</div><div>' + esc(details.name) +
+      (ship === 'collect' ? '' : '<br>' + [details.addr1, details.addr2, details.city + ' ' + details.postcode, details.country].filter(x => x && x.trim()).map(esc).join('<br>')) + '</div></div>' +
+    '<div><div class="k">Delivery</div><div>' + s.label + ' — ' + s.detail + '</div></div>';
+  $('#payNote').textContent = SHOP.paymentUrl ? 'You’ll finish paying on a secure checkout page.' : 'Payments aren’t connected yet. This finishes a demo order and no money is taken.';
+  step(2);
+});
+$('#form').addEventListener('input', e => { const f = e.target.closest('.field'); if (f && f.classList.contains('bad') && e.target.validity.valid) { f.classList.remove('bad'); f.querySelector('.err').textContent = ''; } });
+
+$('#pay').addEventListener('click', () => {
+  if (!bag || !details) return;
+  if (SHOP.paymentUrl) { window.location.href = SHOP.paymentUrl; return; }
+  const n = bag;
+  $('#doneMsg').textContent = 'Thanks, ' + details.name.split(' ')[0] + '. ' + (n === 1 ? 'One copy' : n + ' copies') + ' of porches in the sky ' + (ship === 'collect' ? 'will be ready to collect.' : 'will be on the way.');
+  $('#doneNote').textContent = 'Demo order — no payment was taken.';
+  setBag(0); step(3);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#checkout').classList.contains('on')) closeCheckout(); else closeBag();
+});
+
+// ── Gallery: arrows, thumbnails, keyboard, full-screen view ───────────────
+const SHOTS = [...document.querySelectorAll('.thumb img')].map(i => i.getAttribute('src'));
+const NAMES = ['Cover','Spread 1','Spread 2','Spread 3','Spread 4'];
+let shot = 0;
+function show(i){
+  shot = (i + SHOTS.length) % SHOTS.length;
+  $('#mainImg').src = SHOTS[shot]; $('#mainImg').alt = NAMES[shot] || '';
+  $('#lbImg').src = SHOTS[shot]; $('#lbImg').alt = NAMES[shot] || '';
+  $('#count').textContent = $('#lbCount').textContent = (shot + 1) + ' / ' + SHOTS.length;
+  $$('.thumb').forEach((t, k) => t.classList.toggle('on', k === shot));
+}
+$$('.thumb').forEach(t => t.addEventListener('click', () => show(+t.dataset.i)));
+$$('[data-step]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); show(shot + +b.dataset.step); }));
+const lbOpen = () => { $('#lightbox').classList.add('on'); $('#lightbox').setAttribute('aria-hidden','false'); };
+const lbClose = () => { $('#lightbox').classList.remove('on'); $('#lightbox').setAttribute('aria-hidden','true'); };
+$('#viewer').addEventListener('click', lbOpen);
+$('#lbClose').addEventListener('click', lbClose);
+$('#lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') lbClose(); });
+let tx = null;
+[$('#viewer'), $('#lightbox')].forEach(el => {
+  el.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+  el.addEventListener('touchend', e => { if (tx === null) return; const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 40) show(shot + (d < 0 ? 1 : -1)); tx = null; });
+});
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input,textarea,select')) return;
+  const lb = $('#lightbox').classList.contains('on');
+  if (e.key === 'ArrowRight') show(shot + 1);
+  else if (e.key === 'ArrowLeft') show(shot - 1);
+  else if (e.key === 'Escape' && lb) { e.stopImmediatePropagation(); lbClose(); }
+}, true);
+
+render();
+</script>
+</body>
+</html>
